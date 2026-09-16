@@ -1,0 +1,56 @@
+# ========== 构建产物 ==========
+target/
+build/
+out/
+*.class
+*.jar
+*.war
+
+# ========== VSCode ==========
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+# 注意：.vscode/extensions.json 不忽略，要提交
+
+# ========== JetBrains（防御性配置） ==========
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ========== 敏感信息（最重要） ==========
+.env
+.env.*
+!.env.example
+*.local
+application-local.yml
+application-local.yaml
+application-secret.yml
+
+# ========== 日志与临时文件 ==========
+*.log
+logs/
+*.tmp
+*.bak
+
+# ========== 前端 ==========
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# ========== 系统文件 ==========
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ========== Docker 数据卷 ==========
+volumes/
+data/
+
+# ========== 大文件 ==========
+*.zip
+*.tar.gz
+*.mp4
+*.pth
+*.onnx
