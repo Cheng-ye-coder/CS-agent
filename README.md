@@ -1,4 +1,4 @@
-# CS-agent
+<img width="2557" height="1459" alt="image" src="https://github.com/user-attachments/assets/ee0e1038-40ec-43aa-a11b-1ee535c10afb" /># CS-agent
 
 比特严选智能客服 Agent —— 企业级 Agentic RAG 系统。
 
@@ -34,4 +34,5 @@ CS-agent/
 cd deploy
 docker compose up -d
 
-![alt text](image.png)
+<img width="2557" height="1459" alt="image" src="https://github.com/user-attachments/assets/5cb27de5-c550-4d89-9121-6e676031857e" />
+<img width="2559" height="1375" alt="image" src="https://github.com/user-attachments/assets/a1c5d9a1-493c-4094-a325-0fd2941fde5d" />
