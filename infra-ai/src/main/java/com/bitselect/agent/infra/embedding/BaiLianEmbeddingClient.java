@@ -1,0 +1,25 @@
+
+
+package com.bitselect.agent.infra.embedding;
+
+import com.bitselect.agent.infra.enums.ModelProvider;
+import okhttp3.OkHttpClient;
+import org.springframework.stereotype.Service;
+
+@Service
+public class BaiLianEmbeddingClient extends AbstractOpenAIStyleEmbeddingClient {
+
+    public BaiLianEmbeddingClient(OkHttpClient syncHttpClient) {
+        super(syncHttpClient);
+    }
+
+    @Override
+    public String provider() {
+        return ModelProvider.BAI_LIAN.getId();
+    }
+
+    @Override
+    protected int maxBatchSize() {
+        return 10;
+    }
+}

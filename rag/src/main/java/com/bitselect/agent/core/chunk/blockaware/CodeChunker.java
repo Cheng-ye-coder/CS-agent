@@ -1,0 +1,81 @@
+package com.bitselect.agent.core.chunk.blockaware;
+
+import com.bitselect.agent.core.chunk.model.ChunkDraft;
+import com.bitselect.agent.core.chunk.model.ChunkMetadata;
+import com.bitselect.agent.core.parser.model.CodeBlock;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 【文件用途】代码块 chunker：优先整块保留，超出容忍上限才按行边界降级切分，每块重复围栏。
+ *
+ * 【为什么存在】
+ * - 半截行与缺失围栏会破坏渲染与理解，所以默认不切
+ * - 但 txt 的缩进段落会被解析成代码块、真代码文件本身也可能远超预算，
+ *   单块顶穿嵌入模型输入上限会被静默截断、尾部等于没入库
+ *
+ * 【关键设计】
+ * - 切点一律落在行边界，绝不从行中间切断
+ * - 单行超预算时整行独立成块
+ * - 每块都重复 ```围栏 + 语言标识，保证独立可渲染
+ *
+ * 【被谁引用】BlockAwareChunkerDispatcher（dispatch 中调用）。
+ */
+@Component
+public class CodeChunker implements BlockChunker<CodeBlock> {
+
+    @Override
+    public Class<CodeBlock> blockType() {
+        return CodeBlock.class;
+    }
+
+    @Override
+    public List<ChunkDraft> chunk(CodeBlock block, ChunkContext ctx) {
+        if (block == null) {
+            return List.of();
+        }
+        String language = block.language() == null ? "" : block.language();
+        String code = block.code() == null ? "" : block.code();
+
+        ChunkMetadata metadata = ChunkMetadata.builder()
+                .outlinePath(ctx.outlinePath())
+                .provenance(block.provenance())
+                .build();
+
+        List<String> segments = code.length() <= ctx.budget().toleranceChars()
+                ? List.of(code)
+                : splitByLines(code, ctx.budget().maxChars());
+
+        List<ChunkDraft> result = new ArrayList<>(segments.size());
+        for (String segment : segments) {
+            String markdown = "```" + language + "\n" + segment + "\n```";
+            result.add(ChunkDraft.of(markdown, segment, metadata));
+        }
+        return ChunkDraft.pieces(result);
+    }
+
+    /**
+     * 【方法用途】按行累加切分：单行超预算时整行独立成块，绝不从行中间切断。
+     */
+    private static List<String> splitByLines(String code, int maxChars) {
+        List<String> segments = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        for (String line : code.split("\n", -1)) {
+            int addition = current.isEmpty() ? line.length() : current.length() + 1 + line.length();
+            if (!current.isEmpty() && addition > maxChars) {
+                segments.add(current.toString());
+                current.setLength(0);
+            }
+            if (!current.isEmpty()) {
+                current.append('\n');
+            }
+            current.append(line);
+        }
+        if (!current.isEmpty()) {
+            segments.add(current.toString());
+        }
+        return segments.isEmpty() ? List.of(code) : segments;
+    }
+}
